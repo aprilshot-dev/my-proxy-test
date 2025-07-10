@@ -9,8 +9,9 @@ spec:
   rules:
     {{- range $line := .Files.Lines "files/groups.map" }}
     {{- $parts := splitList " " $line }}
+    {{- if eq (len $parts) 2 }}
     {{- $host := index $parts 0 }}
-    {{- $group := trim (index $parts 1) ";" }}
+    {{- $group := trimSuffix ";" (index $parts 1) }}
     - host: {{ $host }}
       http:
         paths:
@@ -21,4 +22,5 @@ spec:
                 name: {{ $group }}-lb
                 port:
                   number: 80
+    {{- end }}
     {{- end }}
