@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-proxy-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+    {{- range $line := .Files.Lines "files/groups.map" }}
+    {{- $parts := splitList " " $line }}
+    {{- $host := index $parts 0 }}
+    {{- $group := trim (index $parts 1) ";" }}
+    - host: {{ $host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $group }}-lb
+                port:
+                  number: 80
+    {{- end }}
